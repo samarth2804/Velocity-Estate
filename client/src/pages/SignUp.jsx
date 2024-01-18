@@ -3,29 +3,53 @@ import { Link, useNavigate } from 'react-router-dom';
 import OAuth from '../components/OAuth';
 
 export default function SignUp() {
-  const [formData, setFormData] = useState({});
+  const [formData, setFormData] = useState({}); //username, email and password data
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+
+  //function to store username, email and password whenever it changes 
   const handleChange = (e) => {
     setFormData({
       ...formData,
       [e.target.id]: e.target.value,
     });
   };
+ 
+  //submit form handler
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    e.preventDefault(); //prevent refreshing the page when form submitted 
     try {
       setLoading(true);
-      const res = await fetch('/api/auth/signup', {
+      
+      //check for valid username
+      if(formData.username.length < 3){
+        setError("username must be at least 3 characters long");
+        setLoading(false);
+        return;
+      }
+      //check for valid password
+      const userPassword = formData.password;
+      if( userPassword.length <= 6 || /[A-Z]/.test(userPassword) === false || /[a-z]/.test(userPassword) === false || /\d/.test(userPassword) === false ){
+        setError("Password: 6+ chars and must have 1 uppercase, 1 lowercase, 1 digit");
+        setLoading(false);
+        return;
+      }
+      
+
+      //post request to http://localhost:3000/api/auth/signup
+      const res = await fetch('/api/auth/signup', { 
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        //form data is send to server in the request body
+        body: JSON.stringify(formData), //javaScript obj to json string
       });
-      const data = await res.json();
-      console.log(data);
+
+      const data = await res.json(); //take json data from response object and parse to js object
+
+      // if error recieved from server
       if (data.success === false) {
         setLoading(false);
         setError(data.message);
@@ -33,12 +57,13 @@ export default function SignUp() {
       }
       setLoading(false);
       setError(null);
-      navigate('/sign-in');
+      navigate('/sign-in'); //navigate to sign-in page upon successful signup
     } catch (error) {
       setLoading(false);
       setError(error.message);
     }
   };
+
   return (
     <div className='p-3 max-w-lg mx-auto'>
       <h1 className='text-3xl text-center font-semibold my-7'>Sign Up</h1>

@@ -4,12 +4,27 @@ import { errorHandler } from '../utils/error.js';
 import jwt from 'jsonwebtoken';
 
 export const signup = async (req, res, next) => {
-  const { username, email, password } = req.body;
-  const hashedPassword = bcryptjs.hashSync(password, 10);
-  const newUser = new User({ username, email, password: hashedPassword });
   try {
-    await newUser.save();
-    res.status(201).json('User created successfully!');
+  const { username, email, password } = req.body;
+  //check whether user with same email exist
+  let user = await User.findOne({ email: req.body.email });
+  if (user) {
+    const err = errorHandler(400, 'User already exist');
+    next(err);
+  }
+  
+  //Check password length is greater than 5
+  if(password.length < 5 ){
+    const err = errorHandler(400, 'Password must be at least 5 characters long');
+    next(err);
+  }
+
+  const salt = await bcryptjs.genSalt(10); //generate salt(string)
+  const hashedPassword = bcryptjs.hashSync(password, salt); //hashing the password using cryptograpgy hashing algo (and it is irreversible)
+  const newUser = new User({ username, email, password: hashedPassword }); 
+
+    await newUser.save();  //saving user data in database
+    res.status(201).json(`Welcome ${username}!`);
   } catch (error) {
     next(error);
   }

@@ -6,8 +6,11 @@ import authRouter from './routes/auth.route.js';
 import listingRouter from './routes/listing.route.js';
 import cookieParser from 'cookie-parser';
 import path from 'path';
+
+//env intialisation
 dotenv.config();
 
+//MongoDB connection
 mongoose
   .connect(process.env.MONGO)
   .then(() => {
@@ -17,16 +20,17 @@ mongoose
     console.log(err);
   });
 
-  const __dirname = path.resolve();
+const __dirname = path.resolve();
 
+const PORT = process.env.PORT || 3000;
 const app = express();
 
-app.use(express.json());
+app.use(express.json()); //allow sending of json in post/put request
 
 app.use(cookieParser());
 
-app.listen(3000, () => {
-  console.log('Server is running on port 3000!');
+app.listen(PORT, () => {
+  console.log(`Server is running on http://localhost:${PORT}`);
 });
 
 app.use('/api/user', userRouter);
@@ -40,6 +44,7 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'client', 'dist', 'index.html'));
 })
 
+//In case of any erorr this middleware is called
 app.use((err, req, res, next) => {
   const statusCode = err.statusCode || 500;
   const message = err.message || 'Internal Server Error';
