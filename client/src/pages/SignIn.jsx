@@ -10,9 +10,9 @@ import OAuth from '../components/OAuth';
 
 export default function SignIn() {
   const [formData, setFormData] = useState({});
-  const { loading, error } = useSelector((state) => state.user);
-  const navigate = useNavigate();
-  const dispatch = useDispatch();
+  const { loading, error } = useSelector((state) => state.user); //getting state value from the store
+  const navigate = useNavigate(); //to navigate to '/' page after login
+  const dispatch = useDispatch(); //used to dipatch actions to the redux store
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -22,7 +22,8 @@ export default function SignIn() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      dispatch(signInStart());
+      dispatch(signInStart()); //dispatching action
+      //htttp post request 
       const res = await fetch('/api/auth/signin', {
         method: 'POST',
         headers: {
@@ -30,13 +31,14 @@ export default function SignIn() {
         },
         body: JSON.stringify(formData),
       });
-      const data = await res.json();
-      console.log(data);
+
+      const data = await res.json(); //take json data from response object and parse to js object
+      //console.log(data);
       if (data.success === false) {
-        dispatch(signInFailure(data.message));
+        dispatch(signInFailure(data.message)); //dispatch action to show error
         return;
       }
-      dispatch(signInSuccess(data));
+      dispatch(signInSuccess(data)); //disptach action with user data
       navigate('/');
     } catch (error) {
       dispatch(signInFailure(error.message));

@@ -12,12 +12,6 @@ export const signup = async (req, res, next) => {
     const err = errorHandler(400, 'User already exist');
     next(err);
   }
-  
-  //Check password length is greater than 5
-  if(password.length < 5 ){
-    const err = errorHandler(400, 'Password must be at least 5 characters long');
-    next(err);
-  }
 
   const salt = await bcryptjs.genSalt(10); //generate salt(string)
   const hashedPassword = bcryptjs.hashSync(password, salt); //hashing the password using cryptograpgy hashing algo (and it is irreversible)
@@ -33,16 +27,16 @@ export const signup = async (req, res, next) => {
 export const signin = async (req, res, next) => {
   const { email, password } = req.body;
   try {
-    const validUser = await User.findOne({ email });
-    if (!validUser) return next(errorHandler(404, 'User not found!'));
-    const validPassword = bcryptjs.compareSync(password, validUser.password);
-    if (!validPassword) return next(errorHandler(401, 'Wrong credentials!'));
-    const token = jwt.sign({ id: validUser._id }, process.env.JWT_SECRET);
+    const validUser = await User.findOne({ email }); //finding the user email in db
+    if (!validUser) return next(errorHandler(404, 'User not found!')); //if email doesnot exist in db
+    const validPassword = bcryptjs.compareSync(password, validUser.password); //compare the entered password with actual one
+    if (!validPassword) return next(errorHandler(401, 'Wrong credentials!')); 
+    const token = jwt.sign({ id: validUser._id }, process.env.JWT_SECRET); //generate jwt token
     const { password: pass, ...rest } = validUser._doc;
     res
-      .cookie('access_token', token, { httpOnly: true })
+      .cookie('access_token', token, { httpOnly: true }) // saving the token in cookies for a session
       .status(200)
-      .json(rest);
+      .json(rest); //sending user info(- password)
   } catch (error) {
     next(error);
   }
