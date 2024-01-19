@@ -44,7 +44,10 @@ export const signin = async (req, res, next) => {
 
 export const google = async (req, res, next) => {
   try {
+    //finding whether user exist
     const user = await User.findOne({ email: req.body.email });
+
+    //if user exist, create token and save in cookie
     if (user) {
       const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
       const { password: pass, ...rest } = user._doc;
@@ -53,14 +56,13 @@ export const google = async (req, res, next) => {
         .status(200)
         .json(rest);
     } else {
-      const generatedPassword =
-        Math.random().toString(36).slice(-8) +
-        Math.random().toString(36).slice(-8);
-      const hashedPassword = bcryptjs.hashSync(generatedPassword, 10);
+      //if user doesnot exist create the user in db
+      const generatedPassword = req.body.uid;                              //used uid for password
+      const salt = bcryptjs.genSaltSync(10);
+      const hashedPassword = bcryptjs.hashSync(generatedPassword,salt);
       const newUser = new User({
         username:
-          req.body.name.split(' ').join('').toLowerCase() +
-          Math.random().toString(36).slice(-4),
+          req.body.name.split(' ').join('').toLowerCase(),                 //usename should be connected
         email: req.body.email,
         password: hashedPassword,
         avatar: req.body.photo,
