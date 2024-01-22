@@ -15,6 +15,8 @@ import {
   deleteUserStart,
   deleteUserSuccess,
   signOutUserStart,
+  signOutUserFailure,
+  signOutUserSuccess,
 } from '../redux/user/userSlice';
 import { useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
@@ -63,7 +65,8 @@ export default function Profile() {
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.id]: e.target.value });
   };
-
+  
+  //update the user in db
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -91,36 +94,42 @@ export default function Profile() {
       dispatch(updateUserFailure(error.message));                                //in case of error during update dispatch the updateUserFailure action with the error message
     }
   };
-
+  
+  //delete the user from db
   const handleDeleteUser = async () => {
     try {
-      dispatch(deleteUserStart());
+      dispatch(deleteUserStart());                                               //set loading true
+      //http  delete request
       const res = await fetch(`/api/user/delete/${currentUser._id}`, {
         method: 'DELETE',
       });
+
       const data = await res.json();
       if (data.success === false) {
-        dispatch(deleteUserFailure(data.message));
+        dispatch(deleteUserFailure(data.message));                               
         return;
       }
-      dispatch(deleteUserSuccess(data));
+      dispatch(deleteUserSuccess());                                         //set currentuser to null
     } catch (error) {
       dispatch(deleteUserFailure(error.message));
     }
   };
 
+//signOut the user by clearing jwt token and set the currentuser to null
   const handleSignOut = async () => {
     try {
       dispatch(signOutUserStart());
+      //http get request to clear jwt token
       const res = await fetch('/api/auth/signout');
       const data = await res.json();
       if (data.success === false) {
-        dispatch(deleteUserFailure(data.message));
+        dispatch(signOutUserFailure(data.message));
         return;
       }
-      dispatch(deleteUserSuccess(data));
+      //set the currentuser to null
+      dispatch(signOutUserSuccess());  
     } catch (error) {
-      dispatch(deleteUserFailure(data.message));
+      dispatch(signOutUserFailure(data.message));
     }
   };
 

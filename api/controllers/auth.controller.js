@@ -42,6 +42,7 @@ export const signin = async (req, res, next) => {
   }
 };
 
+//sign-in and sign-up using google OAuth
 export const google = async (req, res, next) => {
   try {
     //finding whether user exist
@@ -80,6 +81,7 @@ export const google = async (req, res, next) => {
   }
 };
 
+//clearing the jwt token
 export const signOut = async (req, res, next) => {
   try {
     res.clearCookie('access_token');
