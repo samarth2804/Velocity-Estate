@@ -25,7 +25,7 @@ export default function Profile() {
   const [file, setFile] = useState(undefined);                                   //image file during upload
   const [fileUploadError, setFileUploadError] = useState(false);                 //to show the error during image upload
   const [formData, setFormData] = useState({});                                  
-  const [updateSuccess, setUpdateSuccess] = useState(false);                     
+  const [updateSuccess, setUpdateSuccess] = useState(false);                     //to show the message during user update
   const [showListingsError, setShowListingsError] = useState(false);
   const [userListings, setUserListings] = useState([]);
   const dispatch = useDispatch();
@@ -58,7 +58,8 @@ export default function Profile() {
       }
     );
   };
-
+  
+  //update the form data
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.id]: e.target.value });
   };
@@ -66,24 +67,28 @@ export default function Profile() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      dispatch(updateUserStart());
+      dispatch(updateUserStart());                                              //set loading true
+      //http put request to update the user
       const res = await fetch(`/api/user/update/${currentUser._id}`, {
-        method: 'POST',
+        method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(formData),
       });
+
       const data = await res.json();
+      //if error during update we get success 'false'
       if (data.success === false) {
-        dispatch(updateUserFailure(data.message));
+        dispatch(updateUserFailure(data.message));                              //set the error
         return;
       }
-
+      
+      //if sucessfully updated --> set the updated user as current user
       dispatch(updateUserSuccess(data));
-      setUpdateSuccess(true);
+      setUpdateSuccess(true);                                                    //to show the message after successful update
     } catch (error) {
-      dispatch(updateUserFailure(error.message));
+      dispatch(updateUserFailure(error.message));                                //in case of error during update dispatch the updateUserFailure action with the error message
     }
   };
 

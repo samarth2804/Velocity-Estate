@@ -10,13 +10,17 @@ export const test = (req, res) => {
 };
 
 export const updateUser = async (req, res, next) => {
-  if (req.user.id !== req.params.id)
-    return next(errorHandler(401, 'You can only update your own account!'));
+  //verify the user
+  if (req.user.id !== req.params.id)                                                //unautorized access
+    return next(errorHandler(401, 'You can only update your own account!'));              
   try {
+    //if password updation is requested by user then hash the new password 
     if (req.body.password) {
-      req.body.password = bcryptjs.hashSync(req.body.password, 10);
+      const salt = bcryptjs.genSaltSync(10);
+      req.body.password = bcryptjs.hashSync(req.body.password, salt);
     }
 
+    //find and update the user
     const updatedUser = await User.findByIdAndUpdate(
       req.params.id,
       {
@@ -27,12 +31,12 @@ export const updateUser = async (req, res, next) => {
           avatar: req.body.avatar,
         },
       },
-      { new: true }
+      { new: true }                                            // to get the updated user
     );
 
-    const { password, ...rest } = updatedUser._doc;
+    const { password, ...rest } = updatedUser._doc;            //extact user info
 
-    res.status(200).json(rest);
+    res.status(200).json(rest);                               //send the updated user info 
   } catch (error) {
     next(error);
   }

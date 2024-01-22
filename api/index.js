@@ -25,9 +25,9 @@ const __dirname = path.resolve();
 const PORT = process.env.PORT || 3000;
 const app = express();
 
-app.use(express.json()); //allow sending of json in post/put request
+app.use(express.json());                     //allow sending of json in post/put request
 
-app.use(cookieParser());
+app.use(cookieParser());                     //to get info from the cookie. it adds a cookies property to the request object
 
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
