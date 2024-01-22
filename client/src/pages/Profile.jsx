@@ -18,24 +18,19 @@ import {
 } from '../redux/user/userSlice';
 import { useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
+
 export default function Profile() {
-  const fileRef = useRef(null);
-  const { currentUser, loading, error } = useSelector((state) => state.user);
-  const [file, setFile] = useState(undefined);
-  const [filePerc, setFilePerc] = useState(0);
-  const [fileUploadError, setFileUploadError] = useState(false);
-  const [formData, setFormData] = useState({});
-  const [updateSuccess, setUpdateSuccess] = useState(false);
+  const fileRef = useRef(null);                                                  //ref obj to make a click on input file
+  const { currentUser, loading, error } = useSelector((state) => state.user);    // data from the redux store
+  const [file, setFile] = useState(undefined);                                   //image file during upload
+  const [fileUploadError, setFileUploadError] = useState(false);                 //to show the error during image upload
+  const [formData, setFormData] = useState({});                                  
+  const [updateSuccess, setUpdateSuccess] = useState(false);                     
   const [showListingsError, setShowListingsError] = useState(false);
   const [userListings, setUserListings] = useState([]);
   const dispatch = useDispatch();
-
-  // firebase storage
-  // allow read;
-  // allow write: if
-  // request.resource.size < 2 * 1024 * 1024 &&
-  // request.resource.contentType.matches('image/.*')
-
+  
+  //whenever file changes call the handleFileUpload()
   useEffect(() => {
     if (file) {
       handleFileUpload(file);
@@ -43,23 +38,21 @@ export default function Profile() {
   }, [file]);
 
   const handleFileUpload = (file) => {
+    //intialize storage reference
     const storage = getStorage(app);
     const fileName = new Date().getTime() + file.name;
     const storageRef = ref(storage, fileName);
+    //set the upload task
     const uploadTask = uploadBytesResumable(storageRef, file);
-
+    //upload the image
     uploadTask.on(
       'state_changed',
-      (snapshot) => {
-        const progress =
-          (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-        setFilePerc(Math.round(progress));
-      },
+      null,
       (error) => {
-        setFileUploadError(true);
+        setFileUploadError(true);                                                    //in-case of error during image upload
       },
       () => {
-        getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) =>
+        getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) =>                //upon successful upload set the avartar url to the uploaded image url
           setFormData({ ...formData, avatar: downloadURL })
         );
       }
@@ -160,35 +153,38 @@ export default function Profile() {
       console.log(error.message);
     }
   };
+
   return (
     <div className='p-3 max-w-lg mx-auto'>
       <h1 className='text-3xl font-semibold text-center my-7'>Profile</h1>
       <form onSubmit={handleSubmit} className='flex flex-col gap-4'>
+        {/* input for uploading image file */}
         <input
-          onChange={(e) => setFile(e.target.files[0])}
+          onChange={(e) => setFile(e.target.files[0])}             //save the image file in file state
           type='file'
-          ref={fileRef}
+          ref={fileRef}                                            //using fileRef --> trigger click event
           hidden
-          accept='image/*'
+          accept='image/*'                                        
         />
         <img
-          onClick={() => fileRef.current.click()}
-          src={formData.avatar || currentUser.avatar}
+          onClick={() => fileRef.current.click()}                  //clicking on input file
+          src={formData.avatar || currentUser.avatar}              //if user uploaded avatar then show that one
           alt='profile'
           className='rounded-full h-24 w-24 object-cover cursor-pointer self-center mt-2'
         />
         <p className='text-sm self-center'>
-          {fileUploadError ? (
+          {fileUploadError ? (                                     //if  fileUploadError means image is greater than 2 MB
             <span className='text-red-700'>
               Error Image upload (image must be less than 2 mb)
             </span>
-          ) : filePerc > 0 && filePerc < 100 ? (
-            <span className='text-slate-700'>{`Uploading ${filePerc}%`}</span>
-          ) : filePerc === 100 ? (
-            <span className='text-green-700'>Image successfully uploaded!</span>
-          ) : (
-            ''
-          )}
+          ) :''
+          }
+          { formData.avatar ? (                                    // if user uploaded avatar
+            <span className='text-green-700'>
+             Image uploaded Successfully!                          
+            </span>
+          ) : ''
+          }
         </p>
         <input
           type='text'
@@ -200,15 +196,13 @@ export default function Profile() {
         />
         <input
           type='email'
-          placeholder='email'
-          id='email'
           defaultValue={currentUser.email}
-          className='border p-3 rounded-lg'
-          onChange={handleChange}
+          className='border p-3 rounded-lg bg-zinc-200/50'
+          disabled
         />
         <input
           type='password'
-          placeholder='password'
+          placeholder='Update password'
           onChange={handleChange}
           id='password'
           className='border p-3 rounded-lg'
