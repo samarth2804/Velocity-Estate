@@ -1,22 +1,30 @@
 import Listing from '../models/listing.model.js';
 import { errorHandler } from '../utils/error.js';
 
+//create listing in db
 export const createListing = async (req, res, next) => {
+  if (req.user.id === req.params.id) {
   try {
     const listing = await Listing.create(req.body);                         //create listing in db
     return res.status(201).json(listing);
   } catch (error) {
     next(error);
   }
+}
+else{
+  return next(errorHandler(401, 'You can create only your own listings!'));
+}
 };
 
+//delete a listing from db
 export const deleteListing = async (req, res, next) => {
-  const listing = await Listing.findById(req.params.id);
+  const listing = await Listing.findById(req.params.id);                              //find listing by their id
 
   if (!listing) {
-    return next(errorHandler(404, 'Listing not found!'));
+    return next(errorHandler(404, 'Listing not found!'));                             
   }
-
+  
+  //if listing doesnot belong that user
   if (req.user.id !== listing.userRef) {
     return next(errorHandler(401, 'You can only delete your own listings!'));
   }
@@ -29,8 +37,9 @@ export const deleteListing = async (req, res, next) => {
   }
 };
 
+//update listing in the db
 export const updateListing = async (req, res, next) => {
-  const listing = await Listing.findById(req.params.id);
+  const listing = await Listing.findById(req.params.id);        
   if (!listing) {
     return next(errorHandler(404, 'Listing not found!'));
   }
@@ -39,19 +48,22 @@ export const updateListing = async (req, res, next) => {
   }
 
   try {
+    //find the listing by id and update it 
     const updatedListing = await Listing.findByIdAndUpdate(
       req.params.id,
       req.body,
-      { new: true }
+      { new: true }                                                                           //to get the updated listing
     );
-    res.status(200).json(updatedListing);
+    res.status(200).json(updatedListing);                                                     //send the updated listing
   } catch (error) {
     next(error);
   }
 };
 
+//to get a particular listing
 export const getListing = async (req, res, next) => {
   try {
+    //find listing by their id
     const listing = await Listing.findById(req.params.id);
     if (!listing) {
       return next(errorHandler(404, 'Listing not found!'));

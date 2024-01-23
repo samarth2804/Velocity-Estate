@@ -12,7 +12,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 export default function CreateListing() {
   const { currentUser } = useSelector((state) => state.user);
   const navigate = useNavigate();
-  const params = useParams();
+  const params = useParams();                                                             //for accessing the url params
   const [files, setFiles] = useState([]);
   const [formData, setFormData] = useState({
     imageUrls: [],
@@ -20,9 +20,9 @@ export default function CreateListing() {
     description: '',
     address: '',
     type: 'rent',
-    bedrooms: 1,
-    bathrooms: 1,
-    regularPrice: 50,
+    bedrooms: 0,
+    bathrooms: 0,
+    regularPrice: 0,
     discountPrice: 0,
     offer: false,
     parking: false,
@@ -33,17 +33,20 @@ export default function CreateListing() {
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(false);
 
+//to get listing data and save it in formData state
   useEffect(() => {
     const fetchListing = async () => {
-      const listingId = params.listingId;
+      const listingId = params.listingId;                                                    //to get listing id from url
+      //http get request to get that particular listing                                                    
       const res = await fetch(`/api/listing/get/${listingId}`);
       const data = await res.json();
       if (data.success === false) {
-        console.log(data.message);
+        //console.log(data.message);
         return;
       }
-      setFormData(data);
-    };
+      //set the intial value of formData
+      setFormData(data); 
+    }; 
 
     fetchListing();
   }, []);
@@ -84,11 +87,7 @@ export default function CreateListing() {
       const uploadTask = uploadBytesResumable(storageRef, file);
       uploadTask.on(
         'state_changed',
-        (snapshot) => {
-          const progress =
-            (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-          console.log(`Upload is ${progress}% done`);
-        },
+        null,
         (error) => {
           reject(error);
         },
@@ -109,7 +108,7 @@ export default function CreateListing() {
   };
 
   const handleChange = (e) => {
-    if (e.target.id === 'sale' || e.target.id === 'rent') {
+    if (e.target.id === 'sell' || e.target.id === 'rent') {
       setFormData({
         ...formData,
         type: e.target.id,
@@ -148,8 +147,9 @@ export default function CreateListing() {
         return setError('Discount price must be lower than regular price');
       setLoading(true);
       setError(false);
+      //http put request to update listing
       const res = await fetch(`/api/listing/update/${params.listingId}`, {
-        method: 'POST',
+        method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
@@ -182,7 +182,7 @@ export default function CreateListing() {
             className='border p-3 rounded-lg'
             id='name'
             maxLength='62'
-            minLength='10'
+            minLength='5'
             required
             onChange={handleChange}
             value={formData.name}
@@ -192,6 +192,8 @@ export default function CreateListing() {
             placeholder='Description'
             className='border p-3 rounded-lg'
             id='description'
+            maxLength='150'
+            minLength='8'
             required
             onChange={handleChange}
             value={formData.description}
@@ -209,10 +211,10 @@ export default function CreateListing() {
             <div className='flex gap-2'>
               <input
                 type='checkbox'
-                id='sale'
+                id='sell'
                 className='w-5'
                 onChange={handleChange}
-                checked={formData.type === 'sale'}
+                checked={formData.type === 'sell'}
               />
               <span>Sell</span>
             </div>
@@ -262,8 +264,7 @@ export default function CreateListing() {
               <input
                 type='number'
                 id='bedrooms'
-                min='1'
-                max='10'
+                min = '0'
                 required
                 className='p-3 border border-gray-300 rounded-lg'
                 onChange={handleChange}
@@ -275,8 +276,7 @@ export default function CreateListing() {
               <input
                 type='number'
                 id='bathrooms'
-                min='1'
-                max='10'
+                min = '0'
                 required
                 className='p-3 border border-gray-300 rounded-lg'
                 onChange={handleChange}
@@ -288,8 +288,7 @@ export default function CreateListing() {
               <input
                 type='number'
                 id='regularPrice'
-                min='50'
-                max='10000000'
+                min = '0'
                 required
                 className='p-3 border border-gray-300 rounded-lg'
                 onChange={handleChange}
@@ -298,7 +297,7 @@ export default function CreateListing() {
               <div className='flex flex-col items-center'>
                 <p>Regular price</p>
                 {formData.type === 'rent' && (
-                  <span className='text-xs'>($ / month)</span>
+                  <span className='text-xs'>(&#8377; / month)</span>
                 )}
               </div>
             </div>
@@ -307,8 +306,7 @@ export default function CreateListing() {
                 <input
                   type='number'
                   id='discountPrice'
-                  min='0'
-                  max='10000000'
+                  min = '0'
                   required
                   className='p-3 border border-gray-300 rounded-lg'
                   onChange={handleChange}
@@ -317,7 +315,7 @@ export default function CreateListing() {
                 <div className='flex flex-col items-center'>
                   <p>Discounted price</p>
                   {formData.type === 'rent' && (
-                    <span className='text-xs'>($ / month)</span>
+                    <span className='text-xs'>(&#8377; / month)</span>
                   )}
                 </div>
               </div>
@@ -342,7 +340,7 @@ export default function CreateListing() {
             />
             <button
               type='button'
-              disabled={uploading}
+              disabled={uploading || loading}
               onClick={handleImageSubmit}
               className='p-3 text-green-700 border border-green-700 rounded uppercase hover:shadow-lg disabled:opacity-80'
             >

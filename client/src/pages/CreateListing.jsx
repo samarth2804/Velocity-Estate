@@ -30,8 +30,8 @@ export default function CreateListing() {
 
   const [imageUploadError, setImageUploadError] = useState(false);                 //to show error during listing image upload
   const [uploading, setUploading] = useState(false);                               //set uploading true images upload
-  const [error, setError] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(false);                                       //error during creating of listing
+  const [loading, setLoading] = useState(false);                                   //loading during create listing
   
   //handle images upload and set it on the formData
   const handleImageSubmit = (e) => {
@@ -262,6 +262,7 @@ export default function CreateListing() {
               <input
                 type='number'
                 id='bedrooms'
+                min = '0'
                 required
                 className='p-3 border border-gray-300 rounded-lg'
                 onChange={handleChange}
@@ -273,6 +274,7 @@ export default function CreateListing() {
               <input
                 type='number'
                 id='bathrooms'
+                min = '0'
                 required
                 className='p-3 border border-gray-300 rounded-lg'
                 onChange={handleChange}
@@ -284,6 +286,7 @@ export default function CreateListing() {
               <input
                 type='number'
                 id='regularPrice'
+                min = '0'
                 required
                 className='p-3 border border-gray-300 rounded-lg'
                 onChange={handleChange}  
@@ -301,6 +304,7 @@ export default function CreateListing() {
                 <input
                   type='number'
                   id='discountPrice'
+                  min = '0'
                   required
                   className='p-3 border border-gray-300 rounded-lg'
                   onChange={handleChange}
@@ -335,7 +339,7 @@ export default function CreateListing() {
             />
             <button
               type='button'
-              disabled={uploading}
+              disabled={uploading || loading}
               onClick={handleImageSubmit}
               className='p-3 text-green-700 border border-green-700 rounded uppercase hover:shadow-lg disabled:opacity-80'
             >

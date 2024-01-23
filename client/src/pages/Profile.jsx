@@ -133,9 +133,15 @@ export default function Profile() {
     }
   };
 
-//to make listing available under profile page
+//to make listing visible/hidden
   const handleShowListings = async () => {
     try {
+      //if listing already available --> hide it
+      if(userListings.length > 0) {
+        setUserListings([]);
+        return;
+      }
+  
       setShowListingsError(false);
       //http get request to get all listings of user
       const res = await fetch(`/api/user/listings/${currentUser._id}`);            
@@ -151,8 +157,10 @@ export default function Profile() {
     }
   };
 
+//delete a listing
   const handleListingDelete = async (listingId) => {
     try {
+      //http delete request to delete a listing from db
       const res = await fetch(`/api/listing/delete/${listingId}`, {
         method: 'DELETE',
       });
@@ -161,10 +169,12 @@ export default function Profile() {
         console.log(data.message);
         return;
       }
-
+      
+      //after deleting the listing from db delete it from userListings state
       setUserListings((prev) =>
         prev.filter((listing) => listing._id !== listingId)
       );
+
     } catch (error) {
       console.log(error.message);
     }
@@ -253,7 +263,7 @@ export default function Profile() {
         {updateSuccess ? 'User is updated successfully!' : ''}
       </p>
       <button onClick={handleShowListings} className='text-green-700 w-full'>
-        Show Listings
+        {userListings.length > 0 ? 'Hide Listings' : 'Show Listings'}
       </button>
       <p className='text-red-700 mt-5'>
         {showListingsError ? 'Something went wrong. Try again later' : ''}
