@@ -10,90 +10,97 @@ import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 
 export default function CreateListing() {
-  const { currentUser } = useSelector((state) => state.user);
-  const navigate = useNavigate();
-  const [files, setFiles] = useState([]);
-  const [formData, setFormData] = useState({
+  const { currentUser } = useSelector((state) => state.user);          // get current user from store
+  const navigate = useNavigate();                                      //used to navigate to different pages
+  const [files, setFiles] = useState([]);                              //contain listing images
+  const [formData, setFormData] = useState({                           
     imageUrls: [],
     name: '',
     description: '',
     address: '',
     type: 'rent',
-    bedrooms: 1,
-    bathrooms: 1,
-    regularPrice: 50,
+    bedrooms: 0,
+    bathrooms: 0,
+    regularPrice: 0,
     discountPrice: 0,
     offer: false,
     parking: false,
     furnished: false,
   });
-  const [imageUploadError, setImageUploadError] = useState(false);
-  const [uploading, setUploading] = useState(false);
+
+  const [imageUploadError, setImageUploadError] = useState(false);                 //to show error during listing image upload
+  const [uploading, setUploading] = useState(false);                               //set uploading true images upload
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(false);
-  console.log(formData);
+  
+  //handle images upload and set it on the formData
   const handleImageSubmit = (e) => {
+    //uploading max of 6 files allowed
     if (files.length > 0 && files.length + formData.imageUrls.length < 7) {
       setUploading(true);
       setImageUploadError(false);
+      //creating promises array
       const promises = [];
-
       for (let i = 0; i < files.length; i++) {
-        promises.push(storeImage(files[i]));
+        promises.push(storeImage(files[i]));    
       }
+
+      //wait for the upload of all the images
       Promise.all(promises)
         .then((urls) => {
           setFormData({
             ...formData,
-            imageUrls: formData.imageUrls.concat(urls),
+            imageUrls: formData.imageUrls.concat(urls),                        //conat the uploaded images url into the formData(imageUrls)
           });
           setImageUploadError(false);
           setUploading(false);
         })
-        .catch((err) => {
+        .catch((err) => {                                                     //if any promise get rejected 
           setImageUploadError('Image upload failed (2 mb max per image)');
           setUploading(false);
         });
+
     } else {
       setImageUploadError('You can only upload 6 images per listing');
       setUploading(false);
     }
   };
 
+//store listing images on firebase storage 
   const storeImage = async (file) => {
     return new Promise((resolve, reject) => {
+      //intialise the strong reference
       const storage = getStorage(app);
-      const fileName = new Date().getTime() + file.name;
+      const fileName = new Date().getTime() + file.name;                          //adding curr time for unique file name
       const storageRef = ref(storage, fileName);
+      //set the task
       const uploadTask = uploadBytesResumable(storageRef, file);
       uploadTask.on(
         'state_changed',
-        (snapshot) => {
-          const progress =
-            (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-          console.log(`Upload is ${progress}% done`);
-        },
+        null,
         (error) => {
-          reject(error);
+          reject(error);                                                         //reject the promise in case of error and fulfilled promise by returning error 
         },
         () => {
-          getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
-            resolve(downloadURL);
+          getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {        
+            resolve(downloadURL);                                                //if no error --> resolve the promise and send the url of image
           });
         }
       );
     });
   };
 
+//delete the uploaded image by using its index
   const handleRemoveImage = (index) => {
     setFormData({
       ...formData,
-      imageUrls: formData.imageUrls.filter((_, i) => i !== index),
+      imageUrls: formData.imageUrls.filter((_, i) => i !== index),                     
     });
   };
 
+//set changes in the form data
   const handleChange = (e) => {
-    if (e.target.id === 'sale' || e.target.id === 'rent') {
+    if (e.target.id === 'sell' || e.target.id === 'rent') {
       setFormData({
         ...formData,
         type: e.target.id,
@@ -123,16 +130,19 @@ export default function CreateListing() {
     }
   };
 
+//submit the form --> save listing data to the db
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       if (formData.imageUrls.length < 1)
         return setError('You must upload at least one image');
-      if (+formData.regularPrice < +formData.discountPrice)
+      if (+formData.regularPrice < +formData.discountPrice)                              //'+' for converting it to Number
         return setError('Discount price must be lower than regular price');
       setLoading(true);
       setError(false);
-      const res = await fetch('/api/listing/create', {
+
+      //http post request to save the listing in db
+      const res = await fetch(`/api/listing/create/${currentUser._id}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -142,17 +152,21 @@ export default function CreateListing() {
           userRef: currentUser._id,
         }),
       });
+
       const data = await res.json();
       setLoading(false);
       if (data.success === false) {
         setError(data.message);
       }
-      navigate(`/listing/${data._id}`);
+
+      navigate(`/listing/${data._id}`);                                 //if listing created successfully --> navigate to that particular listing page
     } catch (error) {
       setError(error.message);
       setLoading(false);
     }
   };
+
+
   return (
     <main className='p-3 max-w-4xl mx-auto'>
       <h1 className='text-3xl font-semibold text-center my-7'>
@@ -166,7 +180,7 @@ export default function CreateListing() {
             className='border p-3 rounded-lg'
             id='name'
             maxLength='62'
-            minLength='10'
+            minLength='5'
             required
             onChange={handleChange}
             value={formData.name}
@@ -176,6 +190,8 @@ export default function CreateListing() {
             placeholder='Description'
             className='border p-3 rounded-lg'
             id='description'
+            maxLength='150'
+            minLength='8'
             required
             onChange={handleChange}
             value={formData.description}
@@ -193,10 +209,10 @@ export default function CreateListing() {
             <div className='flex gap-2'>
               <input
                 type='checkbox'
-                id='sale'
+                id='sell'
                 className='w-5'
                 onChange={handleChange}
-                checked={formData.type === 'sale'}
+                checked={formData.type === 'sell'}
               />
               <span>Sell</span>
             </div>
@@ -246,8 +262,6 @@ export default function CreateListing() {
               <input
                 type='number'
                 id='bedrooms'
-                min='1'
-                max='10'
                 required
                 className='p-3 border border-gray-300 rounded-lg'
                 onChange={handleChange}
@@ -259,8 +273,6 @@ export default function CreateListing() {
               <input
                 type='number'
                 id='bathrooms'
-                min='1'
-                max='10'
                 required
                 className='p-3 border border-gray-300 rounded-lg'
                 onChange={handleChange}
@@ -272,17 +284,15 @@ export default function CreateListing() {
               <input
                 type='number'
                 id='regularPrice'
-                min='50'
-                max='10000000'
                 required
                 className='p-3 border border-gray-300 rounded-lg'
-                onChange={handleChange}
+                onChange={handleChange}  
                 value={formData.regularPrice}
               />
               <div className='flex flex-col items-center'>
                 <p>Regular price</p>
                 {formData.type === 'rent' && (
-                  <span className='text-xs'>($ / month)</span>
+                  <span className='text-xs'>(&#8377; / month)</span>
                 )}
               </div>
             </div>
@@ -291,8 +301,6 @@ export default function CreateListing() {
                 <input
                   type='number'
                   id='discountPrice'
-                  min='0'
-                  max='10000000'
                   required
                   className='p-3 border border-gray-300 rounded-lg'
                   onChange={handleChange}
@@ -302,7 +310,7 @@ export default function CreateListing() {
                   <p>Discounted price</p>
 
                   {formData.type === 'rent' && (
-                    <span className='text-xs'>($ / month)</span>
+                    <span className='text-xs'>(&#8377; / month)</span>
                   )}
                 </div>
               </div>
@@ -318,7 +326,7 @@ export default function CreateListing() {
           </p>
           <div className='flex gap-4'>
             <input
-              onChange={(e) => setFiles(e.target.files)}
+              onChange={(e) => setFiles(e.target.files)}                                  
               className='p-3 border border-gray-300 rounded w-full'
               type='file'
               id='images'
@@ -335,7 +343,8 @@ export default function CreateListing() {
             </button>
           </div>
           <p className='text-red-700 text-sm'>
-            {imageUploadError && imageUploadError}
+            {/* if error during listing images upload then show it */}
+            {imageUploadError && imageUploadError}                                   
           </p>
           {formData.imageUrls.length > 0 &&
             formData.imageUrls.map((url, index) => (

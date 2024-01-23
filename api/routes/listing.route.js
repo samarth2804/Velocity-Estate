@@ -4,7 +4,8 @@ import { verifyToken } from '../utils/verifyUser.js';
 
 const router = express.Router();
 
-router.post('/create', verifyToken, createListing);
+//create, delete and update listing is allowed after verification
+router.post('/create/:id', verifyToken, createListing);
 router.delete('/delete/:id', verifyToken, deleteListing);
 router.post('/update/:id', verifyToken, updateListing);
 router.get('/get/:id', getListing);

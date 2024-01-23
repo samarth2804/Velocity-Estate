@@ -56,11 +56,12 @@ export const deleteUser = async (req, res, next) => {
   }
 };
 
+//to get all the listings of the user
 export const getUserListings = async (req, res, next) => {
   if (req.user.id === req.params.id) {
     try {
-      const listings = await Listing.find({ userRef: req.params.id });
-      res.status(200).json(listings);
+      const listings = await Listing.find({ userRef: req.params.id });                  //find the users listing by their id
+      res.status(200).json(listings);                                                   //send all the listings in response
     } catch (error) {
       next(error);
     }

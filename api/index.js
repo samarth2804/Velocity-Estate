@@ -33,10 +33,10 @@ app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
 
-app.use('/api/user', userRouter);
-app.use('/api/auth', authRouter);
-app.use('/api/listing', listingRouter);
-
+app.use('/api/user', userRouter);               //get-user, update-user, delete-user, get-user-listingss
+app.use('/api/auth', authRouter);               //sign-in, sign-up, sign-out
+app.use('/api/listing', listingRouter);         //create,update and delete listings
+ 
 
 app.use(express.static(path.join(__dirname, '/client/dist')));
 

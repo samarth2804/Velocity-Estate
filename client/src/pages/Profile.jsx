@@ -28,8 +28,8 @@ export default function Profile() {
   const [fileUploadError, setFileUploadError] = useState(false);                 //to show the error during image upload
   const [formData, setFormData] = useState({});                                  
   const [updateSuccess, setUpdateSuccess] = useState(false);                     //to show the message during user update
-  const [showListingsError, setShowListingsError] = useState(false);
-  const [userListings, setUserListings] = useState([]);
+  const [showListingsError, setShowListingsError] = useState(false);             //to show error during render of listings
+  const [userListings, setUserListings] = useState([]);                          //to hold all listings of a particular user
   const dispatch = useDispatch();
   
   //whenever file changes call the handleFileUpload()
@@ -133,16 +133,18 @@ export default function Profile() {
     }
   };
 
+//to make listing available under profile page
   const handleShowListings = async () => {
     try {
       setShowListingsError(false);
-      const res = await fetch(`/api/user/listings/${currentUser._id}`);
+      //http get request to get all listings of user
+      const res = await fetch(`/api/user/listings/${currentUser._id}`);            
       const data = await res.json();
       if (data.success === false) {
         setShowListingsError(true);
         return;
       }
-
+      //set the recieved data in the userListings state 
       setUserListings(data);
     } catch (error) {
       setShowListingsError(true);
@@ -254,10 +256,10 @@ export default function Profile() {
         Show Listings
       </button>
       <p className='text-red-700 mt-5'>
-        {showListingsError ? 'Error showing listings' : ''}
+        {showListingsError ? 'Something went wrong. Try again later' : ''}
       </p>
 
-      {userListings && userListings.length > 0 && (
+      {userListings.length > 0 && (
         <div className='flex flex-col gap-4'>
           <h1 className='text-center mt-7 text-2xl font-semibold'>
             Your Listings
