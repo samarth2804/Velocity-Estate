@@ -9,6 +9,6 @@ router.post('/create/:id', verifyToken, createListing);
 router.delete('/delete/:id', verifyToken, deleteListing);
 router.put('/update/:id', verifyToken, updateListing);
 router.get('/get/:id', getListing);                                                   //to get a particular listing from its id 
-router.get('/get', getListings);                         
+router.get('/get', getListings);                                                      //to get access to all listing on search
 
 export default router;

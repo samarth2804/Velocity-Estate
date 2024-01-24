@@ -74,13 +74,15 @@ export const getListing = async (req, res, next) => {
   }
 };
 
+//to get all listings based on search parameter
 export const getListings = async (req, res, next) => {
   try {
-    const limit = parseInt(req.query.limit) || 9;
-    const startIndex = parseInt(req.query.startIndex) || 0;
-    let offer = req.query.offer;
+    //the request query start with ? and can have multiple query separated by &
+    const limit = parseInt(req.query.limit) || 9;                                          //limit the number of listing at a time
+    const startIndex = parseInt(req.query.startIndex) || 0;                                //for skipping some listing (e.g.-> for 1st time noskip, then skip first 9 itmes to fetch next 9 items)
+    let offer = req.query.offer;                                                           //to check request query have offer parameter or not
 
-    if (offer === undefined || offer === 'false') {
+    if (offer === undefined || offer === 'false') {                                        //if offer parameter is not there or it is false --> find all listings with offer or not offer
       offer = { $in: [false, true] };
     }
 
@@ -96,20 +98,25 @@ export const getListings = async (req, res, next) => {
       parking = { $in: [false, true] };
     }
 
-    let type = req.query.type;
+    let type = req.query.type;                                                              //type for sell or rent or both
 
-    if (type === undefined || type === 'all') {
-      type = { $in: ['sale', 'rent'] };
+    if (type === undefined || type === 'all') {                                             //if type is all --> seach all listings (sell or rent)
+      type = { $in: ['sell', 'rent'] };
     }
 
-    const searchTerm = req.query.searchTerm || '';
+    const searchTerm = req.query.searchTerm || '';                                          //find the listing having matching name , address or description
 
-    const sort = req.query.sort || 'createdAt';
+    const sort = req.query.sort || 'createdAt';                                             //sort listing based on price or latest/oldest
 
-    const order = req.query.order || 'desc';
-
-    const listings = await Listing.find({
-      name: { $regex: searchTerm, $options: 'i' },
+    const order = req.query.order || 'desc';                                                //order of sort the listings
+    
+    // find the listings having all the matching fields and sort-order them as specified by user
+    const listings = await Listing.find({    
+      $or: [
+        {'name': { $regex: searchTerm, $options: 'i' }},                                     //options : 'i' --> to avoid casing type (lowerCase or Uppercase) during search of listing
+        {'description': { $regex: searchTerm, $options: 'i' }},
+        {'address': { $regex: searchTerm, $options: 'i' }},
+      ],                                     
       offer,
       furnished,
       parking,
