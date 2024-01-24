@@ -5,23 +5,29 @@ import { useEffect, useState } from 'react';
 
 export default function Header() {
   const { currentUser } = useSelector((state) => state.user);
-  const [searchTerm, setSearchTerm] = useState('');
-  const navigate = useNavigate();
+  const [searchTerm, setSearchTerm] = useState('');                                         //hold search data and set it to the search bar
+  const navigate = useNavigate();                                                           //to navigate to other routes
+  
+  //Search on header form
   const handleSubmit = (e) => {
-    e.preventDefault();
-    const urlParams = new URLSearchParams(window.location.search);
-    urlParams.set('searchTerm', searchTerm);
-    const searchQuery = urlParams.toString();
-    navigate(`/search?${searchQuery}`);
+    e.preventDefault();                                                                     //avoid refershing the page
+    const urlParams = new URLSearchParams(window.location.search);                          //got 6 url search parameters                          
+    urlParams.set('searchTerm', searchTerm);                                                //modify the searchTerm parameter
+    const searchQuery = urlParams.toString();                                               //object to string
+    navigate(`/search?${searchQuery}`);                                                     //navigate to new route (having new SearchTerm and rest same)
   };
 
+  //sync between url seachTerm of url and header search bar
   useEffect(() => {
-    const urlParams = new URLSearchParams(location.search);
-    const searchTermFromUrl = urlParams.get('searchTerm');
+    const urlParams = new URLSearchParams(location.search);                                 
+    const searchTermFromUrl = urlParams.get('searchTerm');                                  //get the searchTerm from search paramters
     if (searchTermFromUrl) {
       setSearchTerm(searchTermFromUrl);
     }
-  }, [location.search]);
+    else{
+      setSearchTerm('');
+    }
+  }, [location.search]);                                                                    //whenever search parameter changes -->sync the search bar with url searchTerm
   
   return (
     <header className='bg-slate-200 shadow-md'>
