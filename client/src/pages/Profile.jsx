@@ -28,7 +28,7 @@ export default function Profile() {
   const [fileUploadError, setFileUploadError] = useState(false);                 //to show the error during image upload
   const [formData, setFormData] = useState({});                                  
   const [updateSuccess, setUpdateSuccess] = useState(false);                     //to show the message during user update
-  const [showListingsError, setShowListingsError] = useState(false);             //to show error during render of listings
+  const [showListingsError, setShowListingsError] = useState(null);             //to show error during render of listings
   const [userListings, setUserListings] = useState([]);                          //to hold all listings of a particular user
   const dispatch = useDispatch();
   
@@ -136,24 +136,29 @@ export default function Profile() {
 //to make listing visible/hidden
   const handleShowListings = async () => {
     try {
+      setShowListingsError(null);
       //if listing already available --> hide it
       if(userListings.length > 0) {
         setUserListings([]);
         return;
       }
   
-      setShowListingsError(false);
       //http get request to get all listings of user
       const res = await fetch(`/api/user/listings/${currentUser._id}`);            
       const data = await res.json();
       if (data.success === false) {
-        setShowListingsError(true);
+        setShowListingsError('Something went wrong. Please try again later');
+        return;
+      }
+      
+      if(data.length === 0){
+        setShowListingsError('No listing found !');
         return;
       }
       //set the recieved data in the userListings state 
       setUserListings(data);
     } catch (error) {
-      setShowListingsError(true);
+      setShowListingsError('Something went wrong. Please try again later');
     }
   };
 
@@ -266,7 +271,7 @@ export default function Profile() {
         {userListings.length > 0 ? 'Hide Listings' : 'Show Listings'}
       </button>
       <p className='text-red-700 mt-5'>
-        {showListingsError ? 'Something went wrong. Try again later' : ''}
+        {showListingsError && showListingsError}
       </p>
 
       {userListings.length > 0 && (

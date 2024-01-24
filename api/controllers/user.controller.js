@@ -70,10 +70,11 @@ export const getUserListings = async (req, res, next) => {
   }
 };
 
+//to get info of other user (landlord)
 export const getUser = async (req, res, next) => {
   try {
     
-    const user = await User.findById(req.params.id);
+    const user = await User.findById(req.params.id);                                       //get the user from db from their id(id is present in the request api route)
   
     if (!user) return next(errorHandler(404, 'User not found!'));
   
