@@ -29,7 +29,7 @@ export default function OAuth() {
           email: result.user.email,
           photo: result.user.photoURL,
           uid : result.user.uid
-        }),
+        })
       });
 
       const data = await res.json();

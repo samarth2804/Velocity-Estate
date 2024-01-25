@@ -63,10 +63,10 @@ export const google = async (req, res, next) => {
       const hashedPassword = bcryptjs.hashSync(generatedPassword,salt);
       const newUser = new User({
         username:
-          req.body.name.split(' ').join('').toLowerCase(),                 //usename should be connected
+        req.body.name.split(' ').join('').toLowerCase(),                 //usename should be connected
         email: req.body.email,
         password: hashedPassword,
-        avatar: req.body.photo,
+        avatar: req.body.photo
       });
       await newUser.save();
       const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET);
