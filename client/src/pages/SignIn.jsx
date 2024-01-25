@@ -1,29 +1,29 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import {
-  signInStart,
-  signInSuccess,
-  signInFailure,
+  signInSuccess
 } from '../redux/user/userSlice';
 import OAuth from '../components/OAuth';
+import {toast} from 'react-hot-toast';
 
 export default function SignIn() {
   const [formData, setFormData] = useState({});
-  const { loading, error } = useSelector((state) => state.user); //getting state value from the store
-  const navigate = useNavigate(); //to navigate to '/' page after login
-  const dispatch = useDispatch(); //used to dipatch actions to the redux store
+  const [loading,setloading ] = useState(false);                                   //slow loading on button during login
+  const navigate = useNavigate();                                                  //to navigate to '/' page after login
+  const dispatch = useDispatch();                                                  //used to dipatch actions to the redux store
   const handleChange = (e) => {
     setFormData({
       ...formData,
       [e.target.id]: e.target.value,
     });
   };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      dispatch(signInStart()); //dispatching action
-      //htttp post request 
+      setloading(true);
+      //http post request 
       const res = await fetch('/api/auth/signin', {
         method: 'POST',
         headers: {
@@ -32,16 +32,18 @@ export default function SignIn() {
         body: JSON.stringify(formData),
       });
 
-      const data = await res.json(); //take json data from response object and parse to js object
-      //console.log(data);
+      const data = await res.json();                                                  //take json data from response object and parse to js object
       if (data.success === false) {
-        dispatch(signInFailure(data.message)); //dispatch action to show error
+        toast.error(data.message);
+        setloading(false);
         return;
       }
-      dispatch(signInSuccess(data)); //disptach action with user data
+      dispatch(signInSuccess(data));                                                 //disptach action with user data
+      toast.success(`Welcome ${data.username} !`); 
+      setloading(false);                                  
       navigate('/');
     } catch (error) {
-      dispatch(signInFailure(error.message));
+      toast.error(error.message);
     }
   };
   return (
@@ -77,7 +79,6 @@ export default function SignIn() {
           <span className='text-blue-700'>Sign up</span>
         </Link>
       </div>
-      {error && <p className='text-red-500 mt-5'>{error}</p>}
     </div>
   );
 }

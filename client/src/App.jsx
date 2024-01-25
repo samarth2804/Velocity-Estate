@@ -32,7 +32,6 @@ export default function App() {
             element={<UpdateListing />}
           />
         </Route>
-
         <Route path='*' element={<ErrorPage/>}></Route>
       </Routes>
     </BrowserRouter>

@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import OAuth from '../components/OAuth';
+import {toast} from 'react-hot-toast';
 
 export default function SignUp() {
-  const [formData, setFormData] = useState({}); //username, email and password data
-  const [error, setError] = useState(null);
+  const [formData, setFormData] = useState({});                                      //username, email and password data
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -24,14 +24,14 @@ export default function SignUp() {
       
       //check for valid username
       if(formData.username.length < 3){
-        setError("username must be at least 3 characters long");
+        toast.error("Username must be a minimum of 3 characters");
         setLoading(false);
         return;
       }
       //check for valid password
       const userPassword = formData.password;
       if( userPassword.length <= 6 || /[A-Z]/.test(userPassword) === false || /[a-z]/.test(userPassword) === false || /\d/.test(userPassword) === false ){
-        setError("Password: 6+ chars and must have 1 uppercase, 1 lowercase, 1 digit");
+        toast.error("Password: 6+ chars and must have 1 uppercase, 1 lowercase, 1 digit");
         setLoading(false);
         return;
       }
@@ -52,15 +52,15 @@ export default function SignUp() {
       // if error recieved from server
       if (data.success === false) {
         setLoading(false);
-        setError(data.message);
+        toast.error(data.message);
         return;
       }
       setLoading(false);
-      setError(null);
+      toast.success("User SignUp Successfully !");
       navigate('/sign-in'); //navigate to sign-in page upon successful signup
     } catch (error) {
       setLoading(false);
-      setError(error.message);
+      toast.error(error.message);
     }
   };
 
@@ -104,7 +104,6 @@ export default function SignUp() {
           <span className='text-blue-700'>Sign in</span>
         </Link>
       </div>
-      {error && <p className='text-red-500 mt-5'>{error}</p>}
     </div>
   );
 }

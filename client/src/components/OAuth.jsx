@@ -3,6 +3,7 @@ import { app } from '../firebase';
 import { useDispatch } from 'react-redux';
 import { signInSuccess } from '../redux/user/userSlice';
 import { useNavigate } from 'react-router-dom';
+import {toast} from 'react-hot-toast';
 
 export default function OAuth() {
   const dispatch = useDispatch();
@@ -33,16 +34,17 @@ export default function OAuth() {
 
       const data = await res.json();
       dispatch(signInSuccess(data));
+      toast.success(`Welcome ${data.username} !`); 
       navigate('/');
     } catch (error) {
-      console.log('could not sign in with google', error);
+      toast.error('could not sign in with google');
     }
   };
 
   return (
     <button
       onClick={handleGoogleClick}
-      type='button'                 //to avoid submitting the form
+      type='button'                                                                        //to avoid submitting the form
       className='bg-red-700 text-white p-3 rounded-lg uppercase hover:opacity-95'
     >
       Continue with google
