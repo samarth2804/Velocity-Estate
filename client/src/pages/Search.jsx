@@ -123,19 +123,22 @@ export default function Search() {
     navigate(`/search?${searchQuery}`);                                                     //navigate to route having that query parameter --> to get the desired listings
   };
 
+  //fetch more listings (9 listings limit)
   const onShowMoreClick = async () => {
-    const numberOfListings = listings.length;
-    const startIndex = numberOfListings;
-    const urlParams = new URLSearchParams(location.search);
-    urlParams.set('startIndex', startIndex);
+    const numberOfListings = listings.length;                                              //total number of listings hold by listing state (total listings fetched)
+    const startIndex = numberOfListings;                                                   //next fetch starting index
+    const urlParams = new URLSearchParams(location.search);                                //get the same query parameters, only the skip(startingIndex) values changes
+    urlParams.set('startIndex', startIndex);                                               //set the new start index for fetching the next 9 listings
     const searchQuery = urlParams.toString();
+    //http get request to get next 9 listings
     const res = await fetch(`/api/listing/get?${searchQuery}`);
     const data = await res.json();
+    //if no more listings are available
     if (data.length < 9) {
       setShowMore(false);
     }
-    setListings([...listings, ...data]);
-  };
+    setListings([...listings, ...data]);                                                    //concat the new listings
+  }; 
 
   return (
     <div className='flex flex-col md:flex-row'>

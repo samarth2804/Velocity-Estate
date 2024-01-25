@@ -7,36 +7,41 @@ import 'swiper/css/bundle';
 import ListingItem from '../components/ListingItem';
 
 export default function Home() {
-  const [offerListings, setOfferListings] = useState([]);
-  const [saleListings, setSaleListings] = useState([]);
-  const [rentListings, setRentListings] = useState([]);
-  SwiperCore.use([Navigation]);
-  console.log(offerListings);
+  const [offerListings, setOfferListings] = useState([]);                               //hold 4 offer listings
+  const [saleListings, setSaleListings] = useState([]);                                 //hold 4 sale listings
+  const [rentListings, setRentListings] = useState([]);                                 //hold 4 rent listings
+  SwiperCore.use([Navigation]);                                                         //to use image slider
+
+  //fetch 4 offer,4 rent and 4 sale listings to show on homepage
   useEffect(() => {
     const fetchOfferListings = async () => {
       try {
+        //http get request to get 4 offer listings
         const res = await fetch('/api/listing/get?offer=true&limit=4');
         const data = await res.json();
-        setOfferListings(data);
-        fetchRentListings();
-      } catch (error) {
-        console.log(error);
-      }
-    };
-    const fetchRentListings = async () => {
-      try {
-        const res = await fetch('/api/listing/get?type=rent&limit=4');
-        const data = await res.json();
-        setRentListings(data);
-        fetchSaleListings();
+        setOfferListings(data);                                                           //save the fetched data
+        fetchRentListings();                                                              //fetch the rent listings data after the offer listings
       } catch (error) {
         console.log(error);
       }
     };
 
+    //http get request to get 4 rent listings
+    const fetchRentListings = async () => {
+      try {
+        const res = await fetch('/api/listing/get?type=rent&limit=4&skip=1');
+        const data = await res.json();
+        setRentListings(data);
+        fetchSaleListings();                                                              //fetch the sale listings data after rent listings data
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    
+    //http get request to get 4 sale listings
     const fetchSaleListings = async () => {
       try {
-        const res = await fetch('/api/listing/get?type=sale&limit=4');
+        const res = await fetch('/api/listing/get?type=sell&limit=4');
         const data = await res.json();
         setSaleListings(data);
       } catch (error) {
@@ -44,7 +49,9 @@ export default function Home() {
       }
     };
     fetchOfferListings();
-  }, []);
+  }, []);                                                                                   //fecth only once after the render of homepage
+
+
   return (
     <div>
       {/* top */}
@@ -55,7 +62,7 @@ export default function Home() {
           place with ease
         </h1>
         <div className='text-gray-400 text-xs sm:text-sm'>
-          Sahand Estate is the best place to find your next perfect place to
+          Velocity Estate is the best place to find your next perfect place to
           live.
           <br />
           We have a wide range of properties for you to choose from.
@@ -119,7 +126,7 @@ export default function Home() {
           <div className=''>
             <div className='my-3'>
               <h2 className='text-2xl font-semibold text-slate-600'>Recent places for sale</h2>
-              <Link className='text-sm text-blue-800 hover:underline' to={'/search?type=sale'}>Show more places for sale</Link>
+              <Link className='text-sm text-blue-800 hover:underline' to={'/search?type=sell'}>Show more places for sale</Link>
             </div>
             <div className='flex flex-wrap gap-4'>
               {saleListings.map((listing) => (
