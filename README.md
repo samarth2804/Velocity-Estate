@@ -1,4 +1,4 @@
-<img src="./readme-files/imgs/cover.jpg">
+<img src="./client/public/cover.jpeg">
 
 # Velocity Real Estate
 
@@ -20,7 +20,6 @@ Home Buyer / Tenant
 
 Home Seller / Renter
 
-- **post** home listing for sale/rent
 - Able to **add a new property easily** for rent/sale.
 - Able to **see all existing properties** in a simple and easy manner.
 - Able to **manage the existing properties such as edit price or delete** easily.
@@ -50,6 +49,5 @@ Home Seller / Renter
 
 Made with ❤️ by <b>Samarth Verma</b> <img src="https://raw.githubusercontent.com/MartinHeinz/MartinHeinz/master/wave.gif" width="16px"> Get in touch!
 
-[GMail](samarthverma2804@gmail.com)
 [LINKEDIN](https://www.linkedin.com/in/samarth2804/)
 
