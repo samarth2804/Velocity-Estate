@@ -20,6 +20,7 @@ import {
 } from '../redux/user/userSlice';
 import { useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
+import Loader from '../components/Loader';
 
 export default function Profile() {
   const fileRef = useRef(null);                                                  //ref obj to make a click on input file
@@ -30,6 +31,7 @@ export default function Profile() {
   const [updateSuccess, setUpdateSuccess] = useState(false);                     //to show the message during user update
   const [showListingsError, setShowListingsError] = useState(null);             //to show error during render of listings
   const [userListings, setUserListings] = useState([]);                          //to hold all listings of a particular user
+  const [loader, setLoader] = useState(false);
   const dispatch = useDispatch();
   
   //whenever file changes call the handleFileUpload()
@@ -142,21 +144,25 @@ export default function Profile() {
         setUserListings([]);
         return;
       }
-  
+      
+      setLoader(true);
       //http get request to get all listings of user
       const res = await fetch(`/api/user/listings/${currentUser._id}`);            
       const data = await res.json();
       if (data.success === false) {
         setShowListingsError('Something went wrong. Please try again later');
+        setLoader(false);
         return;
       }
       
       if(data.length === 0){
         setShowListingsError('No listing found !');
+        setLoader(false);
         return;
       }
       //set the recieved data in the userListings state 
       setUserListings(data);
+      setLoader(false);
     } catch (error) {
       setShowListingsError('Something went wrong. Please try again later');
     }
@@ -273,7 +279,7 @@ export default function Profile() {
       <p className='text-red-700 mt-5'>
         {showListingsError && showListingsError}
       </p>
-
+      {loader && <Loader/>}
       {userListings.length > 0 && (
         <div className='flex flex-col gap-4'>
           <h1 className='text-center mt-7 text-2xl font-semibold'>
