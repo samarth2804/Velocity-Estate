@@ -1,5 +1,3 @@
-<img src="./client/public/cover.jpeg">
-
 # Velocity Real Estate
 
 The live link can be found <a href="https://velocity-estate.onrender.com/" target="_blank" rel="noopener">here</a>.
@@ -51,3 +49,6 @@ Made with ❤️ by <b>Samarth Verma</b> <img src="https://raw.githubusercontent
 
 [LINKEDIN](https://www.linkedin.com/in/samarth2804/)
 
+# Screenshot
+
+<img src="./client/public/cover.jpeg">
